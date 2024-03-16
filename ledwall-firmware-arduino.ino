@@ -3,9 +3,7 @@
 
 #define LED_PIN    6
 #define LED_COUNT 300
-#define US_PER_LED 3
 #define MAX_SERIAL_READ 502
-#define SPI_READY_PIN 3
 
 #define CMD_ID_SINGLE 10
 #define CMD_ID_STRING 20
@@ -49,7 +47,6 @@ ISR (SPI_STC_vect) {
 // remaining buffer size.  Whoops.
 void waitForSPIBytes(uint16_t num_bytes) {
   bytes_pending = num_bytes;
-  //digitalWrite(SPI_READY_PIN, LOW);
   delay(1);
   while(spi_bytes_in_buf < num_bytes) { }
 #ifdef DEBUG
@@ -74,7 +71,7 @@ void setup() {
 
   // Set slave mode and attach ISR for SPI comms  
 #ifdef DEBUG  
-  // 115200 is the fastest known to work before i tried the crazy 500,000 speeds etc.
+  // 115200 is the fastest known to work before I tried 500,000 and killed the USB UART.
   Serial.begin(115200);
   Serial.flush();
   Serial.print("XMasduino started.\n");
@@ -92,6 +89,7 @@ void loop() {
   waitForSPIBytes(sizeof(CmdType));
   cmd_type = (CmdType *)bufcur;
   bufcur++;
+
   switch(*cmd_type) {
     case CMD_ID_SINGLE:
       waitForSPIBytes(sizeof(LEDState));
