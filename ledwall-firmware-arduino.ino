@@ -37,15 +37,9 @@ volatile uint16_t spi_bytes_in_buf;
 volatile uint16_t bytes_pending;
 volatile uint8_t buf[MAX_SERIAL_READ];
 
-// we just assume that we'll never let this buffer overflow.
-// its a christmas tree after all.
+// we just assume that we'll never let this buffer overflow, which has, obviously, been proven stupid.
 ISR (SPI_STC_vect) {
   buf[spi_bytes_in_buf++] = SPDR;
-  // tail-drop
-  //if(spi_bytes_in_buf >= bytes_pending) {
-  //   PORTD |= 0b00000100;
-  //}
-  
 }
 
 // wait for the buffer to fill up more, return the current global cursor
@@ -78,9 +72,6 @@ void setup() {
   // MISO pin
   pinMode(MISO,OUTPUT);
 
-  // SPI READY pin
-  //pinMode(SPI_READY_PIN,OUTPUT);
-
   // Set slave mode and attach ISR for SPI comms  
 #ifdef DEBUG  
   // 115200 is the fastest known to work before i tried the crazy 500,000 speeds etc.
@@ -91,9 +82,6 @@ void setup() {
 #endif
   SPCR |= _BV(SPE);
   SPI.attachInterrupt();
-
-  // block SPI to start
-  //digitalWrite(SPI_READY_PIN, HIGH);
 }
 
 void loop() {
